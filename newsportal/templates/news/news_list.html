@@ -1,0 +1,18 @@
+{% extends 'default.html' %}
+{% load censor_filter %}
+
+{% block title %}Новости{% endblock %}
+
+{% block content %}
+    <h2>Все новости</h2>
+
+    {% for news in news_list %}
+        <div class="news-item">
+            <h3><a href="{{ news.get_absolute_url }}">{{ news.title|censor }}</a></h3>
+            <div class="date">{{ news.created_at|date:"d.m.Y" }}</div>
+            <p>{{ news.content|truncatechars:20|censor }}</p>
+        </div>
+    {% empty %}
+        <p>Новостей пока нет.</p>
+    {% endfor %}
+{% endblock %}

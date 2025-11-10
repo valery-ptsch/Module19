@@ -1,0 +1,16 @@
+{% extends 'default.html' %}
+{% load censor_filter %}
+
+{% block title %}{{ news.title|censor }}{% endblock %}
+
+{% block content %}
+    <div class="news-detail">
+        <h2>{{ news.title|censor }}</h2>
+        <div class="date">{{ news.created_at|date:"d.m.Y" }}</div>
+        <div class="author">Автор: {{ news.author.user.username }}</div>
+        <div class="content">
+            <p>{{ news.content|censor }}</p>
+        </div>
+        <a href="/news/">← Вернуться к списку новостей</a>
+    </div>
+{% endblock %}
