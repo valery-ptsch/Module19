@@ -13,7 +13,7 @@ CENSORED_WORDS = [
 @stringfilter
 def censor(value):
     if not isinstance(value, str):
-        raise ValueError("Фильтр 'censor' можно применять только к строковым значениям")
+        return value
 
     result = value
     for word in CENSORED_WORDS:

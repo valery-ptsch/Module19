@@ -4,15 +4,78 @@
 {% block title %}Новости{% endblock %}
 
 {% block content %}
-    <h2>Все новости</h2>
-
-    {% for news in news_list %}
-        <div class="news-item">
-            <h3><a href="{{ news.get_absolute_url }}">{{ news.title|censor }}</a></h3>
-            <div class="date">{{ news.created_at|date:"d.m.Y" }}</div>
-            <p>{{ news.content|truncatechars:20|censor }}</p>
+    <div class="page-header">
+        <h2>Последние новости</h2>
+        <div class="header-actions">
+            <a href="{% url 'news_search' %}" class="btn btn-primary">Поиск новостей</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'news_create' %}" class="btn btn-success">Добавить новость</a>
+            {% endif %}
         </div>
-    {% empty %}
-        <p>Новостей пока нет.</p>
-    {% endfor %}
+    </div>
+
+    {% if news_list %}
+        <div class="news-grid">
+            {% for news in news_list %}
+                <div class="news-card">
+                    <div class="news-header">
+                        <h3 class="news-title">
+                            <a href="{% url 'news_detail' news.pk %}">{{ news.title|censor }}</a>
+                        </h3>
+                        <div class="news-meta">
+                            <span class="news-date">{{ news.created_at|date:"d.m.Y H:i" }}</span>
+                            <span class="news-author">Автор: {{ news.author.user.username }}</span>
+                            <span class="news-rating">★ {{ news.rating }}</span>
+                        </div>
+                    </div>
+
+                    <div class="news-content">
+                        <p>{{ news.content|truncatewords:50|censor }}</p>
+                    </div>
+
+                    <div class="news-categories">
+                        {% for category in news.categories.all %}
+                            <span class="category-tag">{{ category.name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="news-actions">
+                        <a href="{% url 'news_detail' news.pk %}" class="btn btn-primary btn-sm">Читать далее</a>
+                        {% if user.is_authenticated and user == news.author.user %}
+                            <a href="{% url 'news_edit' news.pk %}" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                            <a href="{% url 'news_delete' news.pk %}" class="btn btn-outline-danger btn-sm">Удалить</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="pagination-link pagination-first">&laquo; Первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link pagination-prev">‹ Предыдущая</a>
+            {% endif %}
+
+            <span class="pagination-current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="pagination-link pagination-next">Следующая ›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link pagination-last">Последняя &raquo;</a>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <div class="empty-state">
+            <h3>Новостей пока нет</h3>
+            <p>Будьте первым, кто добавит новость!</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'news_create' %}" class="btn btn-success">Добавить первую новость</a>
+            {% else %}
+                <a href="{% url 'admin:login' %}" class="btn btn-primary">Войти для добавления новости</a>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}
