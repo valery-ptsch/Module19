@@ -1,0 +1,80 @@
+{% extends 'default.html' %}
+{% load censor_filter %}
+
+{% block title %}Статьи{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h2>Статьи</h2>
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'article_create' %}" class="btn btn-success">Добавить статью</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if article_list %}
+        <div class="articles-grid">
+            {% for article in article_list %}
+                <div class="article-card">
+                    <div class="article-header">
+                        <h3 class="article-title">
+                            <a href="{% url 'article_detail' article.pk %}">{{ article.title|censor }}</a>
+                        </h3>
+                        <div class="article-meta">
+                            <span class="article-date">{{ article.created_at|date:"d.m.Y H:i" }}</span>
+                            <span class="article-author">Автор: {{ article.author.user.username }}</span>
+                            <span class="article-rating">★ {{ article.rating }}</span>
+                        </div>
+                    </div>
+
+                    <div class="article-content">
+                        <p>{{ article.content|truncatewords:70|censor }}</p>
+                    </div>
+
+                    <div class="article-categories">
+                        {% for category in article.categories.all %}
+                            <span class="category-tag">{{ category.name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="article-actions">
+                        <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary btn-sm">Читать далее</a>
+                        {% if user.is_authenticated and user == article.author.user %}
+                            <a href="{% url 'article_edit' article.pk %}" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                            <a href="{% url 'article_delete' article.pk %}" class="btn btn-outline-danger btn-sm">Удалить</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="pagination-link pagination-first">&laquo; Первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link pagination-prev">‹ Предыдущая</a>
+            {% endif %}
+
+            <span class="pagination-current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="pagination-link pagination-next">Следующая ›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link pagination-last">Последняя &raquo;</a>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <div class="empty-state">
+            <h3>Статей пока нет</h3>
+            <p>Напишите первую статью на интересующую вас тему!</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'article_create' %}" class="btn btn-success">Написать статью</a>
+            {% else %}
+                <a href="{% url 'admin:login' %}" class="btn btn-primary">Войти для написания статьи</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

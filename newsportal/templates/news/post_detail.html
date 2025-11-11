@@ -1,0 +1,47 @@
+{% extends 'default.html' %}
+{% load censor_filter %}
+
+{% block title %}{{ post.title|censor }}{% endblock %}
+
+{% block content %}
+    <div class="post-detail">
+        <h2>{{ post.title|censor }}</h2>
+        <div class="meta">
+            <span class="date">{{ post.created_at|date:"d.m.Y H:i" }}</span>
+            <span class="author">Автор: {{ post.author.user.username }}</span>
+            <span class="type">
+                {% if post.post_type == 'NW' %}Новость{% else %}Статья{% endif %}
+            </span>
+            <span class="rating">Рейтинг: {{ post.rating }}</span>
+        </div>
+
+        <div class="categories">
+            Категории:
+            {% for category in post.categories.all %}
+                <span class="category-tag">{{ category.name }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="content">
+            {{ post.content|censor|linebreaks }}
+        </div>
+
+        <div class="actions">
+            {% if user.is_authenticated and user == post.author.user %}
+                {% if post.post_type == 'NW' %}
+                    <a href="{% url 'news_edit' post.pk %}" class="btn btn-primary">Редактировать</a>
+                    <a href="{% url 'news_delete' post.pk %}" class="btn btn-danger">Удалить</a>
+                {% else %}
+                    <a href="{% url 'article_edit' post.pk %}" class="btn btn-primary">Редактировать</a>
+                    <a href="{% url 'article_delete' post.pk %}" class="btn btn-danger">Удалить</a>
+                {% endif %}
+            {% endif %}
+
+            {% if post.post_type == 'NW' %}
+                <a href="{% url 'news_list' %}" class="btn">← К списку новостей</a>
+            {% else %}
+                <a href="{% url 'article_list' %}" class="btn">← К списку статей</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
